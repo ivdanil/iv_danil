@@ -1,0 +1,43 @@
+.main-nav {
+    background: rgba(0, 0, 0, 0.8);
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    gap: 30px;
+}
+
+.nav-container a {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    padding: 5px 10px;
+    transition: color 0.3s;
+    position: relative;
+}
+
+.nav-container a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: #ff6b6b;
+    transition: width 0.3s;
+}
+
+.nav-container a:hover::after,
+.nav-container a.active::after {
+    width: 100%;
+}
+
+.nav-container a:hover,
+.nav-container a.active {
+    color: #ff6b6b;
+}
