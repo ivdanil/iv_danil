@@ -1,5 +1,57 @@
 <?php
-require_once 'includes/auth_check.php'; // Убрали ../, так как includes в той же папке Pages
+session_start();
+
+if (!isset($_SESSION['username'])) {
+    header('Location: signUp.php');
+    exit;
+}
+
+$username = $_SESSION['username'];
+
+$host = '127.0.1.30';
+$port = 3306;
+$user = 'root';
+$password = '';
+$database = 'IVANOV_DB';
+
+$conn = mysqli_connect($host, $user, $password, $database, $port);
+
+if (!$conn) {
+    die("Ошибка подключения: " . mysqli_connect_error());
+}
+
+mysqli_set_charset($conn, "utf8");
+
+
+$query = "
+    SELECT c.*, u.Name as UniverseName, ci.ImageURL 
+    FROM `Characters` c
+    LEFT JOIN `Universes` u ON c.UniverseID = u.UniverseID
+    LEFT JOIN `CharacterImages` ci ON c.CharacterID = ci.CharacterID
+    WHERE c.CharacterType = 'Злодей'
+";
+$result = mysqli_query($conn, $query);
+
+if (!$result) {
+    die("Ошибка запроса: " . mysqli_error($conn));
+}
+
+$villains = [];
+if (mysqli_num_rows($result) > 0) {
+    while ($row = mysqli_fetch_assoc($result)) {
+        // Преобразуем BLOB изображение в base64
+        if (!empty($row['ImageURL']) && $row['ImageURL'] !== null) {
+            $imageData = $row['ImageURL'];
+            $row['ImageData'] = 'data:image/jpeg;base64,' . base64_encode($imageData);
+        } else {
+            $row['ImageData'] = null;
+        }
+        $villains[] = $row;
+    }
+}
+
+mysqli_close($conn);
+
 $current_page = 'villains';
 ?>
 <!DOCTYPE html>
@@ -8,17 +60,14 @@ $current_page = 'villains';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Злодеи - CHARACTERPEDIA</title>
-    <link rel="stylesheet" href="../Styles/Global/fonts.css">
-    <link rel="stylesheet" href="../Styles/Pages/main.css">
-    <link rel="stylesheet" href="../Styles/Pages/villains.css">
-    <link rel="stylesheet" href="../Components/cards.css">
-    <link rel="stylesheet" href="../Components/header.css">
-    <link rel="stylesheet" href="../Components/footer.css">
-    <link rel="stylesheet" href="../Components/nav.css">
-    <script src="../Scripts/main.js" defer></script>
+    <link rel="stylesheet" href="../../Styles/Global/fonts.css">
+    <link rel="stylesheet" href="../../Styles/Pages/main.css">
+    <link rel="stylesheet" href="../../Styles/Pages/villains.css">
+    <link rel="stylesheet" href="../../Components/header.css">
+    <link rel="stylesheet" href="../../Components/footer.css">
+    <link rel="stylesheet" href="../../Components/nav.css">
 </head>
 <body>
-    <!-- Header -->
     <header class="main-header">
         <div class="header-content">
             <div class="logo">CHARACTERPEDIA</div>
@@ -28,83 +77,53 @@ $current_page = 'villains';
             </div>
         </div>
     </header>
-
-    <!-- Nav -->
     <nav class="main-nav">
         <div class="nav-container">
             <a href="main.php">Главная</a>
             <a href="heroes.php">Герои</a>
             <a href="villains.php" class="active">Злодеи</a>
-            <a href="#films">Фильмы</a>
         </div>
     </nav>
-
-    <!-- Hero секция -->
     <section class="page-hero villains-hero">
         <div class="hero-content">
             <h1>Культовые злодеи</h1>
         </div>
     </section>
-
-    <!-- Злодеи -->
     <section class="villains-section">
         <div class="container">
             <div class="villains-grid">
-                <!-- Дарт Вейдер -->
-                <div class="character-card villain-card">
-                    <div class="character-image">
-                        <img src="https://cdn.fishki.net/upload/post/2016/12/27/2176615/tn/ac9b29847547e1863d7b77459a63d1d2.jpg" 
-                             alt="Дарт Вейдер" loading="lazy">
-                    </div>
-                    <div class="character-info">
-                        <h3>Дарт Вейдер</h3>
-                        <p class="character-description">Бывший Энакин Скайуокер, рыцарь-джедай, павший на Тёмную сторону Силы.</p>
-                        <div class="character-meta">
-                            <span class="character-universe">Звёздные Войны</span>
-                            <span class="character-type">Ситх</span>
-                        </div>
-                        <button class="card-btn" onclick="showDetails('Дарт Вейдер')">Подробнее</button>
-                    </div>
-                </div>
-
-                <!-- Джокер -->
-                <div class="character-card villain-card">
-                    <div class="character-image">
-                        <img src="https://gamebomb.ru/files/galleries/001/9/9b/405115.jpg" 
-                             alt="Джокер" loading="lazy">
-                    </div>
-                    <div class="character-info">
-                        <h3>Джокер</h3>
-                        <p class="character-description">Загадочный преступник, олицетворяющий хаос и анархию.</p>
-                        <div class="character-meta">
-                            <span class="character-universe">DC Comics</span>
-                            <span class="character-type">Криминальный гений</span>
-                        </div>
-                        <button class="card-btn" onclick="showDetails('Джокер')">Подробнее</button>
-                    </div>
-                </div>
-
-                <!-- Танос -->
-                <div class="character-card villain-card">
-                    <div class="character-image">
-                        <img src="https://upload.wikimedia.org/wikipedia/ru/7/7b/Josh_Brolin_as_Thanos.jpeg" 
-                             alt="Танос" loading="lazy">
-                    </div>
-                    <div class="character-info">
-                        <h3>Танос</h3>
-                        <p class="character-description">Бессмертный титан, стремящийся восстановить баланс во вселенной.</p>
-                        <div class="character-meta">
-                            <span class="character-universe">Marvel Comics</span>
-                            <span class="character-type">Безумный Титан</span>
-                        </div>
-                        <button class="card-btn" onclick="showDetails('Танос')">Подробнее</button>
-                    </div>
-                </div>
+                <?php if (!empty($villains)): ?>
+                    <?php foreach ($villains as $villain): ?>
+                        <a href="character.php?id=<?php echo $villain['CharacterID']; ?>" style="text-decoration: none;">
+                            <div class="villain-card">
+                                <div class="villain-image">
+                                    <?php if (!empty($villain['ImageData'])): ?>
+                                        <img src="<?php echo $villain['ImageData']; ?>" 
+                                             alt="<?php echo htmlspecialchars($villain['Name']); ?>" 
+                                             loading="lazy">
+                                    <?php else: ?>
+                                        <img src="https://via.placeholder.com/300x200?text=<?php echo urlencode($villain['Name']); ?>" 
+                                             alt="<?php echo htmlspecialchars($villain['Name']); ?>" 
+                                             loading="lazy">
+                                    <?php endif; ?>
+                                </div>
+                                <div class="villain-info">
+                                    <h3><?php echo htmlspecialchars($villain['Name']); ?></h3>
+                                    <p class="villain-description"><?php echo htmlspecialchars($villain['Biography'] ?? 'Описание отсутствует'); ?></p>
+                                    <div class="villain-meta">
+                                        <span class="villain-universe"><?php echo htmlspecialchars($villain['UniverseName'] ?? 'Неизвестно'); ?></span>
+                                        <span class="villain-type"><?php echo htmlspecialchars($villain['CharacterType'] ?? 'villain'); ?></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p>Нет данных о злодеях</p>
+                <?php endif; ?>
             </div>
         </div>
     </section>
-
-    <!-- Footer -->
     <footer class="main-footer">
         <div class="footer-content">
             <div class="footer-section">
@@ -118,7 +137,6 @@ $current_page = 'villains';
                     <li><a href="main.php">Главная</a></li>
                     <li><a href="heroes.php">Герои</a></li>
                     <li><a href="villains.php">Злодеи</a></li>
-                    <li><a href="#films">Фильмы</a></li>
                 </ul>
             </div>
             
@@ -130,7 +148,7 @@ $current_page = 'villains';
         </div>
         
         <div class="footer-bottom">
-            <p>© 2025 Энциклопедия культовых персонажей. Все права защищены.</p>
+            <p>© 2026 Энциклопедия культовых персонажей. Все права защищены.</p>
         </div>
     </footer>
 </body>

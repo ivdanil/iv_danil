@@ -1,0 +1,472 @@
+.page-hero {
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+    position: relative;
+    background-size: cover;
+    background-position: center;
+}
+
+
+.spiderman-hero {
+    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.7)), 
+                url('https://images6.alphacoders.com/132/1322795.jpeg') center/cover no-repeat;
+}
+
+.batman-hero {
+    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.8)), 
+                url('https://hq-wallpapers.ru/wallpapers/7/hq-wallpapers_ru_films_33877_1920x1080.jpg') center/cover no-repeat;
+}
+
+.luke-hero {
+    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.7)), 
+                url('https://wallpapercave.com/wp/wp10741422.jpg') center/cover no-repeat;
+}
+
+.page-hero h1 {
+    font-size: 3.5rem;
+    margin-bottom: 15px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.hero-quote {
+    font-size: 1.2rem;
+    font-style: italic;
+    opacity: 0.95;
+}
+
+
+.character-main {
+    padding: 60px 0;
+    background: #f5f5f5;
+    min-height: calc(100vh - 400px);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+
+.character-grid {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 40px;
+}
+
+
+.character-sidebar {
+    position: sticky;
+    top: 20px;
+}
+
+.character-image-box {
+    background: #fff;
+    border-radius: 15px;
+    overflow: hidden;
+    margin-bottom: 25px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    border: 1px solid #e0e0e0;
+    transition: transform 0.3s ease;
+}
+
+.character-image-box:hover {
+    transform: translateY(-5px);
+}
+
+.character-image-box img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.character-info-box,
+.character-stats-box {
+    background: #fff;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    border: 1px solid #e0e0e0;
+    transition: transform 0.3s ease;
+}
+
+.character-info-box:hover,
+.character-stats-box:hover {
+    transform: translateY(-3px);
+}
+
+.character-info-box h3,
+.character-stats-box h3 {
+    font-size: 1.2rem;
+    color: #333;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #2ed573;
+}
+
+.info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.info-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+    color: #666;
+}
+
+.info-list li:last-child {
+    border-bottom: none;
+}
+
+.info-list li strong {
+    color: #333;
+    min-width: 110px;
+    display: inline-block;
+}
+
+.stat {
+    margin-bottom: 15px;
+}
+
+.stat:last-child {
+    margin-bottom: 0;
+}
+
+.stat-name {
+    display: block;
+    color: #666;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.stat-bar {
+    background: #e0e0e0;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.stat-fill {
+    background: #2ed573;
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+
+.character-content {
+    background: #fff;
+    border-radius: 15px;
+    padding: 35px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    border: 1px solid #e0e0e0;
+}
+
+.content-section {
+    margin-bottom: 35px;
+}
+
+.content-section:last-child {
+    margin-bottom: 0;
+}
+
+.content-section h2 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #2ed573;
+    display: inline-block;
+}
+
+.content-section p {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.content-section p:last-child {
+    margin-bottom: 0;
+}
+
+
+.abilities-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.abilities-list li {
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+    color: #666;
+    line-height: 1.5;
+}
+
+.abilities-list li:last-child {
+    border-bottom: none;
+}
+
+.abilities-list li strong {
+    color: #333;
+    min-width: 150px;
+    display: inline-block;
+}
+
+
+.movies-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 10px;
+}
+
+.movie-item {
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    color: #555;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    border-left: 3px solid #2ed573;
+}
+
+.movie-item:hover {
+    background: #2ed573;
+    color: white;
+    transform: translateX(5px);
+}
+
+
+.quote-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    padding: 30px;
+    margin: 35px 0;
+    text-align: center;
+}
+
+.quote-section blockquote {
+    margin: 0;
+}
+
+.quote-section p {
+    font-size: 1.2rem;
+    font-style: italic;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.quote-section cite {
+    color: rgba(255,255,255,0.8);
+    font-size: 0.9rem;
+    font-style: normal;
+}
+
+
+.navigation-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.btn-back, .btn-share {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    font-weight: 500;
+    text-align: center;
+}
+
+.btn-back {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-back:hover {
+    background: #5a6268;
+    transform: translateX(-3px);
+    box-shadow: 0 3px 10px rgba(108,117,125,0.3);
+}
+
+.btn-share {
+    background: #2ed573;
+    color: white;
+}
+
+.btn-share:hover {
+    background: #28c76f;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 10px rgba(46,213,115,0.3);
+}
+
+
+@media (max-width: 968px) {
+    .character-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .character-sidebar {
+        position: static;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+    
+    .page-hero h1 {
+        font-size: 2.5rem;
+    }
+    
+    .hero-quote {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .character-main {
+        padding: 40px 0;
+    }
+    
+    .character-content {
+        padding: 25px;
+    }
+    
+    .content-section h2 {
+        font-size: 1.3rem;
+    }
+    
+    .movies-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .navigation-buttons {
+        flex-direction: column;
+    }
+    
+    .btn-back, .btn-share {
+        text-align: center;
+        width: 100%;
+    }
+    
+    .page-hero {
+        height: 350px;
+    }
+    
+    .page-hero h1 {
+        font-size: 2rem;
+    }
+    
+    .hero-quote {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-hero {
+        height: 300px;
+    }
+    
+    .page-hero h1 {
+        font-size: 1.5rem;
+    }
+    
+    .hero-quote {
+        font-size: 0.85rem;
+    }
+    
+    .character-main {
+        padding: 30px 0;
+    }
+    
+    .character-content {
+        padding: 20px;
+    }
+    
+    .content-section h2 {
+        font-size: 1.2rem;
+    }
+    
+    .content-section p,
+    .abilities-list li,
+    .movie-item {
+        font-size: 0.9rem;
+    }
+    
+    .info-list li strong {
+        min-width: 90px;
+    }
+    
+    .abilities-list li strong {
+        min-width: 120px;
+        display: block;
+        margin-bottom: 5px;
+    }
+    
+    .quote-section {
+        padding: 20px;
+    }
+    
+    .quote-section p {
+        font-size: 1rem;
+    }
+    
+    .btn-back, .btn-share {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+}
+
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.character-grid {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.character-image-box,
+.character-info-box,
+.character-stats-box,
+.character-content {
+    animation: fadeIn 0.6s ease-out;
+}
+
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #2ed573;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #28c76f;
+}

@@ -1,5 +1,55 @@
 <?php
-require_once 'includes/auth_check.php'; // Убрали ../, так как includes в той же папке Pages
+session_start();
+
+if (!isset($_SESSION['username'])) {
+    header('Location: login.php');
+    exit;
+}
+
+$username = $_SESSION['username'];
+
+$host = '127.0.1.30';
+$port = 3306;
+$user = 'root';
+$password = '';
+$database = 'IVANOV_DB';
+
+$conn = mysqli_connect($host, $user, $password, $database, $port);
+
+if (!$conn) {
+    die("Ошибка подключения: " . mysqli_connect_error());
+}
+
+mysqli_set_charset($conn, "utf8");
+
+$query = "
+    SELECT c.*, u.Name as UniverseName, ci.ImageURL 
+    FROM `Characters` c
+    LEFT JOIN `Universes` u ON c.UniverseID = u.UniverseID
+    LEFT JOIN `CharacterImages` ci ON c.CharacterID = ci.CharacterID
+    WHERE c.CharacterType = 'Герой'
+";
+$result = mysqli_query($conn, $query);
+
+if (!$result) {
+    die("Ошибка запроса: " . mysqli_error($conn));
+}
+
+$heroes = [];
+if (mysqli_num_rows($result) > 0) {
+    while ($row = mysqli_fetch_assoc($result)) {
+        if (!empty($row['ImageURL']) && $row['ImageURL'] !== null) {
+            $imageData = $row['ImageURL'];
+            $row['ImageData'] = 'data:image/jpeg;base64,' . base64_encode($imageData);
+        } else {
+            $row['ImageData'] = null;
+        }
+        $heroes[] = $row;
+    }
+}
+
+mysqli_close($conn);
+
 $current_page = 'heroes';
 ?>
 <!DOCTYPE html>
@@ -8,17 +58,14 @@ $current_page = 'heroes';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Герои - CHARACTERPEDIA</title>
-    <link rel="stylesheet" href="../Styles/Global/fonts.css">
-    <link rel="stylesheet" href="../Styles/Pages/main.css">
-    <link rel="stylesheet" href="../Styles/Pages/heroes.css">
-    <link rel="stylesheet" href="../Components/cards.css">
-    <link rel="stylesheet" href="../Components/header.css">
-    <link rel="stylesheet" href="../Components/footer.css">
-    <link rel="stylesheet" href="../Components/nav.css">
-    <script src="../Scripts/main.js" defer></script>
+    <link rel="stylesheet" href="../../Styles/Global/fonts.css">
+    <link rel="stylesheet" href="../../Styles/Pages/main.css">
+    <link rel="stylesheet" href="../../Styles/Pages/heroes.css">
+    <link rel="stylesheet" href="../../Components/header.css">
+    <link rel="stylesheet" href="../../Components/footer.css">
+    <link rel="stylesheet" href="../../Components/nav.css">
 </head>
 <body>
-    <!-- Header -->
     <header class="main-header">
         <div class="header-content">
             <div class="logo">CHARACTERPEDIA</div>
@@ -28,83 +75,53 @@ $current_page = 'heroes';
             </div>
         </div>
     </header>
-
-    <!-- Nav -->
     <nav class="main-nav">
         <div class="nav-container">
             <a href="main.php">Главная</a>
             <a href="heroes.php" class="active">Герои</a>
             <a href="villains.php">Злодеи</a>
-            <a href="#films">Фильмы</a>
         </div>
     </nav>
-
-    <!-- Hero секция -->
     <section class="page-hero heroes-hero">
         <div class="hero-content">
             <h1>Культовые герои</h1>
         </div>
     </section>
-
-    <!-- Герои -->
     <section class="heroes-section">
         <div class="container">
             <div class="heroes-grid">
-                <!-- Человек-паук -->
-                <div class="character-card hero-card">
-                    <div class="character-image">
-                        <img src="https://i.bigenc.ru/resizer/resize?sign=OyQueVxbzcpJ4dirKjERbg&filename=vault/84d5593080c47a4910358619baee0adb.webp&width=1200" 
-                             alt="Человек-паук" loading="lazy">
-                    </div>
-                    <div class="character-info">
-                        <h3>Человек-паук</h3>
-                        <p class="character-description">Питер Паркер - обычный подросток, получивший суперспособности после укуса радиоактивного паука.</p>
-                        <div class="character-meta">
-                            <span class="character-universe">Marvel Comics</span>
-                            <span class="character-type">Супергерой</span>
-                        </div>
-                        <button class="card-btn" onclick="showDetails('Человек-паук')">Подробнее</button>
-                    </div>
-                </div>
-
-                <!-- Бэтмен -->
-                <div class="character-card hero-card">
-                    <div class="character-image">
-                        <img src="https://cdn1.epicgames.com/undefined/offer/batman-arkham-knight_promo-2048x1152-ed2be22b3f24f446534b90b122ed560d.jpg" 
-                             alt="Бэтмен" loading="lazy">
-                    </div>
-                    <div class="character-info">
-                        <h3>Бэтмен</h3>
-                        <p class="character-description">Брюс Уэйн, миллиардер, который после гибели родителей поклялся бороться с преступностью в Готэм-сити.</p>
-                        <div class="character-meta">
-                            <span class="character-universe">DC Comics</span>
-                            <span class="character-type">Супергерой</span>
-                        </div>
-                        <button class="card-btn" onclick="showDetails('Бэтмен')">Подробнее</button>
-                    </div>
-                </div>
-
-                <!-- Люк Скайуокер -->
-                <div class="character-card hero-card">
-                    <div class="character-image">
-                        <img src="https://citaty.info/files/portraits/lyuk-skaiuoker.jpg" 
-                             alt="Люк Скайуокер" loading="lazy">
-                    </div>
-                    <div class="character-info">
-                        <h3>Люк Скайуокер</h3>
-                        <p class="character-description">Центральный персонаж «Звездных войн», джедай, сын Энакина Скайуокера и Падме Амидалы.</p>
-                        <div class="character-meta">
-                            <span class="character-universe">Lucasfilm</span>
-                            <span class="character-type">Джедай</span>
-                        </div>
-                        <button class="card-btn" onclick="showDetails('Люк Скайуокер')">Подробнее</button>
-                    </div>
-                </div>
+                <?php if (!empty($heroes)): ?>
+                    <?php foreach ($heroes as $hero): ?>
+                        <a href="character.php?id=<?php echo $hero['CharacterID']; ?>" style="text-decoration: none;">
+                            <div class="hero-card">
+                                <div class="hero-image">
+                                    <?php if (!empty($hero['ImageData'])): ?>
+                                        <img src="<?php echo $hero['ImageData']; ?>" 
+                                             alt="<?php echo htmlspecialchars($hero['Name']); ?>" 
+                                             loading="lazy">
+                                    <?php else: ?>
+                                        <img src="https://via.placeholder.com/300x200?text=<?php echo urlencode($hero['Name']); ?>" 
+                                             alt="<?php echo htmlspecialchars($hero['Name']); ?>" 
+                                             loading="lazy">
+                                    <?php endif; ?>
+                                </div>
+                                <div class="hero-info">
+                                    <h3><?php echo htmlspecialchars($hero['Name']); ?></h3>
+                                    <p class="hero-description"><?php echo htmlspecialchars($hero['Biography'] ?? 'Описание отсутствует'); ?></p>
+                                    <div class="hero-meta">
+                                        <span class="hero-universe"><?php echo htmlspecialchars($hero['UniverseName'] ?? 'Неизвестно'); ?></span>
+                                        <span class="hero-type"><?php echo htmlspecialchars($hero['CharacterType'] ?? 'unknown'); ?></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p>Нет данных о персонажах</p>
+                <?php endif; ?>
             </div>
         </div>
     </section>
-
-    <!-- Footer -->
     <footer class="main-footer">
         <div class="footer-content">
             <div class="footer-section">
@@ -118,7 +135,6 @@ $current_page = 'heroes';
                     <li><a href="main.php">Главная</a></li>
                     <li><a href="heroes.php">Герои</a></li>
                     <li><a href="villains.php">Злодеи</a></li>
-                    <li><a href="#films">Фильмы</a></li>
                 </ul>
             </div>
             
@@ -130,14 +146,8 @@ $current_page = 'heroes';
         </div>
         
         <div class="footer-bottom">
-            <p>© 2025 Энциклопедия культовых персонажей. Все права защищены.</p>
+            <p>© 2026 Энциклопедия культовых персонажей. Все права защищены.</p>
         </div>
     </footer>
-
-    <script>
-        function showDetails(name) {
-            alert(`Подробнее о ${name}`);
-        }
-    </script>
 </body>
 </html>

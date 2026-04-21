@@ -1,10 +1,8 @@
 <?php
-session_start();
-
 if (!isset($_SESSION['username'])) {
-    header('Location: signUp.php');
+    header('Location: login.php');
     exit;
 }
 
-$username = $_SESSION['username'];
+$username = $_SESSION['username'] ?? 'Гость';
 ?>

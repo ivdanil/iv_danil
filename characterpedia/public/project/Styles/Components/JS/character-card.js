@@ -1,4 +1,3 @@
-// Компонент карточки персонажа
 class CharacterCard extends HTMLElement {
   connectedCallback() {
     const image = this.getAttribute('image') || 'https://via.placeholder.com/300x200';
