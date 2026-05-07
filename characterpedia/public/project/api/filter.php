@@ -19,14 +19,12 @@ if (!$conn) {
 
 mysqli_set_charset($conn, 'utf8');
 
-// --- Получаем параметры ---
 $universe_id = isset($_GET['universe']) ? (int)$_GET['universe'] : 0;
 $type        = isset($_GET['type'])     ? mysqli_real_escape_string($conn, trim($_GET['type'])) : '';
 $year_from   = isset($_GET['year_from']) ? (int)$_GET['year_from'] : 0;
 $year_to     = isset($_GET['year_to'])   ? (int)$_GET['year_to']   : 0;
 $search      = isset($_GET['search'])    ? mysqli_real_escape_string($conn, trim($_GET['search'])) : '';
 
-// --- Строим WHERE ---
 $where = [];
 if ($universe_id > 0) $where[] = "c.UniverseID = $universe_id";
 if (!empty($type))    $where[] = "c.CharacterType = '$type'";
@@ -36,7 +34,6 @@ if (!empty($search))  $where[] = "c.Name LIKE '%$search%'";
 
 $where_clause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
 
-// --- Основной запрос ---
 $query = "
     SELECT
         c.CharacterID,
@@ -65,7 +62,6 @@ if (!$result) {
     exit;
 }
 
-// --- Получаем название вселенной для заголовка ---
 $universe_name = '';
 if ($universe_id > 0) {
     $u_res = mysqli_query($conn, "SELECT Name FROM Universes WHERE UniverseID = $universe_id");
@@ -74,7 +70,6 @@ if ($universe_id > 0) {
     }
 }
 
-// --- Собираем персонажей ---
 $characters = [];
 while ($row = mysqli_fetch_assoc($result)) {
     // Конвертируем BLOB-изображение в base64
@@ -83,18 +78,16 @@ while ($row = mysqli_fetch_assoc($result)) {
     } else {
         $row['ImageData'] = null;
     }
-    unset($row['ImageURL']); // убираем сырой BLOB из JSON
+    unset($row['ImageURL']); 
     $characters[] = $row;
 }
 
-// --- Счётчик ---
 $count_query  = "SELECT COUNT(*) AS total FROM Characters c $where_clause";
 $count_result = mysqli_query($conn, $count_query);
 $total        = ($count_result && $count_row = mysqli_fetch_assoc($count_result)) ? (int)$count_row['total'] : 0;
 
 mysqli_close($conn);
 
-// --- Возвращаем ответ, включая поле filters для updateTitle() ---
 echo json_encode([
     'success'    => true,
     'total'      => $total,

@@ -84,7 +84,6 @@ if ($comments_result && mysqli_num_rows($comments_result) > 0) {
     }
 }
 
-// Получаем работы
 $works_query = "
     SELECT w.*
     FROM `Works` w
@@ -100,8 +99,16 @@ if ($works_result && mysqli_num_rows($works_result) > 0) {
 }
 
 mysqli_close($conn);
+$is_favorite = false;
+$conn2 = mysqli_connect('127.0.1.30', 'root', '', 'IVANOV_DB', 3306);
+if ($conn2) {
+    mysqli_set_charset($conn2, 'utf8');
+    $uid = (int)$_SESSION['user_id'];
+    $fav_res = mysqli_query($conn2, "SELECT FavoriteID FROM Favorites WHERE UserID = $uid AND CharacterID = $character_id");
+    $is_favorite = ($fav_res && mysqli_num_rows($fav_res) > 0);
+    mysqli_close($conn2);
+}
 
-// Определяем тип персонажа для активного меню
 $character_type = $character['CharacterType'] ?? '';
 
 if ($character_type == 'Герой') {
@@ -118,13 +125,65 @@ if ($character_type == 'Герой') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($character['Name']); ?> - CHARACTERPEDIA</title>
-    <link rel="stylesheet" href="../../Styles/Global/fonts.css">
-    <link rel="stylesheet" href="../../Styles/Global/reset.css">
-    <link rel="stylesheet" href="../../Styles/Pages/main.css">
-    <link rel="stylesheet" href="../../Styles/Pages/character.css">
-    <link rel="stylesheet" href="../../Components/header.css">
-    <link rel="stylesheet" href="../../Components/footer.css">
-    <link rel="stylesheet" href="../../Components/nav.css">
+    <link rel="stylesheet" href="../Styles/Global/fonts.css">
+    <link rel="stylesheet" href="../Styles/Global/reset.css">
+    <link rel="stylesheet" href="../Styles/Pages/main.css">
+    <link rel="stylesheet" href="../Styles/Pages/character.css">
+    <link rel="stylesheet" href="../Components/header.css">
+    <link rel="stylesheet" href="../Components/footer.css">
+    <link rel="stylesheet" href="../Components/nav.css">
+    <style>
+        .fav-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid #ff6b6b;
+            border-radius: 10px;
+            background: transparent;
+            color: #ff6b6b;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .fav-btn:hover {
+            background: #ff6b6b;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,107,107,0.3);
+        }
+        .fav-btn--active {
+            background: #ff6b6b;
+            color: white;
+        }
+        .fav-btn--active:hover {
+            background: #ff5252;
+            border-color: #ff5252;
+        }
+        .fav-toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #333;
+            color: white;
+            padding: 12px 22px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        .fav-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
 </head>
 <body>
     <header class="main-header">
@@ -141,6 +200,7 @@ if ($character_type == 'Герой') {
             <a href="main.php" <?php echo ($current_page == 'main') ? 'class="active"' : ''; ?>>Главная</a>
             <a href="heroes.php" <?php echo ($current_page == 'heroes') ? 'class="active"' : ''; ?>>Герои</a>
             <a href="villains.php" <?php echo ($current_page == 'villains') ? 'class="active"' : ''; ?>>Злодеи</a>
+            <a href="profile.php">Кабинет</a>
         </div>
     </nav>
     
@@ -165,6 +225,16 @@ if ($character_type == 'Герой') {
                         <?php endif; ?>
                     </div>
                     
+
+                    <!-- Кнопка избранного -->
+                    <button
+                        id="fav-btn"
+                        class="fav-btn <?php echo $is_favorite ? 'fav-btn--active' : ''; ?>"
+                        onclick="toggleFavorite(<?php echo $character_id; ?>)"
+                    >
+                        <span id="fav-icon"><?php echo $is_favorite ? '' : ''; ?></span>
+                        <span id="fav-text"><?php echo $is_favorite ? 'В избранном' : 'В избранное'; ?></span>
+                    </button>
                     <div class="character-info-box">
                         <h3>Основная информация</h3>
                         <ul class="info-list">
@@ -277,5 +347,52 @@ if ($character_type == 'Герой') {
             <p>© 2026 Энциклопедия культовых персонажей. Все права защищены.</p>
         </div>
     </footer>
+
+    <div id="fav-toast" class="fav-toast"></div>
+
+    <script>
+    function toggleFavorite(characterId) {
+        var btn  = document.getElementById('fav-btn');
+        var icon = document.getElementById('fav-icon');
+        var text = document.getElementById('fav-text');
+
+        btn.disabled = true;
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '../../api/favorite.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+        xhr.onload = function () {
+            btn.disabled = false;
+            var data;
+            try { data = JSON.parse(xhr.responseText); } catch(e) { return; }
+
+            if (data.success) {
+                if (data.action === 'added') {
+                    icon.textContent = '';
+                    text.textContent = 'В избранном';
+                    btn.classList.add('fav-btn--active');
+                    showToast('Добавлено в избранное ');
+                } else {
+                    icon.textContent = '';
+                    text.textContent = 'В избранное';
+                    btn.classList.remove('fav-btn--active');
+                    showToast('Убрано из избранного');
+                }
+            }
+        };
+
+        xhr.onerror = function () { btn.disabled = false; };
+        xhr.send('character_id=' + characterId);
+    }
+
+    function showToast(msg) {
+        var toast = document.getElementById('fav-toast');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(function() { toast.classList.remove('show'); }, 2500);
+    }
+    </script>
+
 </body>
 </html>

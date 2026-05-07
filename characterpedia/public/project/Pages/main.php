@@ -22,7 +22,6 @@ if (!$conn) {
 
 mysqli_set_charset($conn, 'utf8');
 
-// --- Вселенные для select ---
 $universes = [];
 $universe_result = mysqli_query($conn, "SELECT UniverseID, Name FROM Universes ORDER BY Name");
 if ($universe_result) {
@@ -31,7 +30,6 @@ if ($universe_result) {
     }
 }
 
-// --- Диапазон лет для плейсхолдеров ---
 $year_result = mysqli_query($conn, "
     SELECT
         MIN(CAST(FirstAppearance AS UNSIGNED)) AS min_year,
@@ -43,16 +41,10 @@ $year_range = mysqli_fetch_assoc($year_result);
 $min_year   = $year_range['min_year'] ?? 1938;
 $max_year   = $year_range['max_year'] ?? 2026;
 
-// --- Общий счётчик персонажей ---
 $count_result     = mysqli_query($conn, "SELECT COUNT(*) AS total FROM Characters");
 $total_characters = mysqli_fetch_assoc($count_result)['total'] ?? 0;
 
-// -----------------------------------------------------------------
-// ИСПРАВЛЕНИЕ №1: при первой загрузке получаем ВСЕ персонажи
-// (не LIMIT 12), чтобы счётчик и сетка совпадали.
-// Если база очень большая — можно вернуть LIMIT и добавить пагинацию,
-// но тогда счётчик тоже должен отражать именно это количество.
-// -----------------------------------------------------------------
+
 $query = "
     SELECT
         c.CharacterID,
@@ -92,9 +84,27 @@ $current_page = 'main';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CHARACTERPEDIA</title>
-    <link rel="stylesheet" href="../../Styles/Global/fonts.css">
-    <link rel="stylesheet" href="../../Styles/Pages/main.css">
-   
+    <link rel="stylesheet" href="../Styles/Global/fonts.css">
+    <link rel="stylesheet" href="../Styles/Pages/main.css">
+    <link rel="stylesheet" href="../Components/header.css">
+    <link rel="stylesheet" href="../Components/footer.css">
+    <link rel="stylesheet" href="../Components/nav.css">
+    <style>
+        .profile-link {
+            color: #ff6b6b;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 8px 15px;
+            border: 2px solid #ff6b6b;
+            border-radius: 5px;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        .profile-link:hover {
+            background: #ff6b6b;
+            color: white;
+        }
+    </style>
 </head>
 <body>
     <header class="main-header">
@@ -102,6 +112,7 @@ $current_page = 'main';
             <div class="logo">CHARACTERPEDIA</div>
             <div class="user-info">
                 <span>Добро пожаловать, <span class="user-name"><?php echo htmlspecialchars($username); ?></span>!</span>
+                <a href="profile.php" class="profile-link">Кабинет</a>
                 <a href="logout.php" class="logout-btn">Выйти</a>
             </div>
         </div>
@@ -112,6 +123,7 @@ $current_page = 'main';
             <a href="main.php" class="active">Главная</a>
             <a href="heroes.php">Герои</a>
             <a href="villains.php">Злодеи</a>
+            <a href="profile.php">Кабинет</a>
         </div>
     </nav>
 
@@ -277,9 +289,7 @@ $current_page = 'main';
         var resultCount    = document.getElementById('result-count');
         var loader         = document.getElementById('filter-loader');
 
-        // -----------------------------------------------------------------
-        // Строим URL запроса к api/filter.php
-        // -----------------------------------------------------------------
+        
         function buildFilterUrl() {
             var params = [];
             if (universeFilter.value) params.push('universe=' + encodeURIComponent(universeFilter.value));
@@ -287,12 +297,10 @@ $current_page = 'main';
             if (yearFrom.value)       params.push('year_from='+ encodeURIComponent(yearFrom.value));
             if (yearTo.value)         params.push('year_to='  + encodeURIComponent(yearTo.value));
             if (searchName.value.trim()) params.push('search='+ encodeURIComponent(searchName.value.trim()));
-            return '../../api/filter.php' + (params.length ? '?' + params.join('&') : '');
+            return '../api/filter.php' + (params.length ? '?' + params.join('&') : '');
         }
 
-        // -----------------------------------------------------------------
-        // Загружаем отфильтрованных персонажей через AJAX
-        // -----------------------------------------------------------------
+   
         function loadFilteredCharacters() {
             loader.style.display = 'flex';
             charactersGrid.style.opacity = '0.4';
@@ -313,7 +321,7 @@ $current_page = 'main';
                 try {
                     data = JSON.parse(xhr.responseText);
                 } catch (e) {
-                    // Выводим «сырой» ответ, чтобы было видно PHP-ошибку
+                    
                     showError('Ошибка разбора ответа. Ответ сервера: ' +
                               xhr.responseText.substring(0, 300));
                     return;
@@ -324,7 +332,7 @@ $current_page = 'main';
                     return;
                 }
 
-                // ИСПРАВЛЕНИЕ №2: data.filters теперь реально приходит из API
+              
                 updateTitle(data.filters);
                 resultCount.textContent = data.total;
                 renderCharacters(data.characters);
@@ -339,9 +347,7 @@ $current_page = 'main';
             xhr.send();
         }
 
-        // -----------------------------------------------------------------
-        // Обновляем заголовок секции в зависимости от фильтров
-        // -----------------------------------------------------------------
+    
         function updateTitle(filters) {
             if (!filters) { resultsTitle.textContent = 'Все персонажи'; return; }
 
@@ -358,9 +364,7 @@ $current_page = 'main';
             resultsTitle.textContent = title;
         }
 
-        // -----------------------------------------------------------------
-        // Рендерим карточки персонажей
-        // -----------------------------------------------------------------
+     
         function renderCharacters(characters) {
             if (!characters || characters.length === 0) {
                 charactersGrid.innerHTML =
@@ -375,7 +379,7 @@ $current_page = 'main';
             for (var i = 0; i < characters.length; i++) {
                 var c = characters[i];
 
-                // Изображение или плейсхолдер
+                
                 var imageHtml;
                 if (c.ImageData) {
                     imageHtml = '<img src="' + c.ImageData + '" alt="' +
@@ -388,7 +392,7 @@ $current_page = 'main';
                 var typeClass = (c.CharacterType === 'Герой') ? 'hero-badge' : 'villain-badge';
                 var bio       = (c.Biography || '').substring(0, 120);
                 var yearHtml  = c.FirstAppearance
-                    ? '<p class="character-year"><span>📅</span> ' + escHtml(c.FirstAppearance) + '</p>'
+                    ? '<p class="character-year"><span></span> ' + escHtml(c.FirstAppearance) + '</p>'
                     : '';
 
                 html += '<a href="character.php?id=' + c.CharacterID + '" class="character-card-link">';
@@ -412,9 +416,7 @@ $current_page = 'main';
             charactersGrid.innerHTML = html;
         }
 
-        // -----------------------------------------------------------------
-        // Сброс фильтров → сбрасываем поля и делаем запрос без параметров
-        // -----------------------------------------------------------------
+
         function resetFilters() {
             universeFilter.value = '';
             typeFilter.value     = '';
@@ -422,12 +424,10 @@ $current_page = 'main';
             yearTo.value         = '';
             searchName.value     = '';
             resultsTitle.textContent = 'Все персонажи';
-            loadFilteredCharacters(); // запрос без параметров = все персонажи
+            loadFilteredCharacters(); 
         }
 
-        // -----------------------------------------------------------------
-        // Вспомогательная: экранирование HTML для JS-генерируемого контента
-        // -----------------------------------------------------------------
+
         function escHtml(str) {
             return String(str)
                 .replace(/&/g, '&amp;')
@@ -444,18 +444,16 @@ $current_page = 'main';
                 '</div>';
         }
 
-        // -----------------------------------------------------------------
-        // Слушатели событий
-        // -----------------------------------------------------------------
+      
         applyBtn.addEventListener('click', loadFilteredCharacters);
         resetBtn.addEventListener('click', resetFilters);
 
-        // Enter в поле поиска
+        
         searchName.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') loadFilteredCharacters();
         });
 
-        // Автокоррекция диапазона лет
+        
         yearFrom.addEventListener('change', function () {
             var from = parseInt(this.value, 10) || 0;
             var to   = parseInt(yearTo.value, 10) || 0;
